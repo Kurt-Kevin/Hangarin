@@ -2,5 +2,5 @@
 
 ```
 username: admin
-password: 202380100
+password: Tzk10b7er
 ```
