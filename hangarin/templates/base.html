@@ -1,0 +1,596 @@
+{% load static %}
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{% block title %}Hangarin | Task Manager{% endblock %}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/argon-dashboard.min.css' %}"">
+  <style>
+    /* Modern Color Scheme & Typography */
+    :root {
+      --primary-color: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --secondary-color: #ec4899;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --info-color: #06b6d4;
+      --sidebar-bg: #f8fafc;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --bg-light: #f1f5f9;
+      --border-color: #e2e8f0;
+    }
+
+    * {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body, .g-sidenav-show {
+      background-color: #f5f7fa;
+      color: var(--text-primary);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Sidebar Styling */
+    .sidenav {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+    }
+
+    .sidenav-header {
+      border-bottom: 2px solid var(--border-color);
+      padding: 1.5rem !important;
+    }
+
+    .sidenav-header .navbar-brand span {
+      color: var(--primary-dark);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      padding: 1rem 1rem 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      padding: 0.875rem 1rem !important;
+      margin: 0.25rem 0;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .nav-link:hover {
+      background-color: rgba(99, 102, 241, 0.1);
+      color: var(--primary-dark);
+      transform: translateX(2px);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%) !important;
+      color: #fff !important;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .nav-link.active .nav-link-text, .nav-link.active i {
+      color: #fff !important;
+    }
+
+    .nav-link-text {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      background: #f5f7fa;
+      border-radius: 0;
+    }
+
+    /* Navbar Styling */
+    .navbar-main {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border-radius: 0;
+    }
+
+    /* User Avatar */
+    .navbar-main .rounded-circle {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Badge Styling - More Vibrant */
+    .badge-status {
+      font-size: 0.75rem;
+      padding: 0.4em 0.8em;
+      border-radius: 6px;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+      display: inline-block;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-pending {
+      background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
+      color: #92400e;
+    }
+
+    .badge-inprogress {
+      background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+      color: #164e63;
+    }
+
+    .badge-completed {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      color: #166534;
+    }
+
+    .badge-critical {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      color: #991b1b;
+    }
+
+    .badge-high {
+      background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
+      color: #a16207;
+    }
+
+    .badge-medium {
+      background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%);
+      color: #164e63;
+    }
+
+    .badge-low {
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      color: #334155;
+    }
+
+    .badge-optional {
+      background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%);
+      color: #6b21a8;
+    }
+
+    /* Table Styling */
+    .table {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .table th {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      border-top: none;
+      border-bottom: 2px solid var(--border-color);
+      padding: 0.875rem;
+      background-color: var(--bg-light);
+    }
+
+    .table td {
+      font-size: 0.9rem;
+      vertical-align: middle;
+      padding: 0.875rem;
+      color: var(--text-primary);
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: rgba(99, 102, 241, 0.05);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Button Styling */
+    .btn {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-color);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+    }
+
+    .btn-secondary:hover {
+      background-color: #be185d;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #047857 0%, var(--success-color) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #f36164 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #dc2626 0%, var(--danger-color) 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-action {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Cards & Stat Cards */
+    .card {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      background: #ffffff;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .card-header {
+      border-bottom: 2px solid var(--border-color);
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 12px 12px 0 0;
+      padding: 1.25rem;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+      color: var(--text-primary);
+    }
+
+    .stat-card {
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      transform: translateY(-4px);
+    }
+
+    .stat-icon {
+      width: 52px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%);
+    }
+
+    /* Form Styling */
+    .form-control, .form-select {
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.7rem 0.875rem;
+      font-family: 'Poppins', sans-serif;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      background-color: #fff;
+    }
+
+    .form-control::placeholder {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .form-label {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Alert Styling */
+    .alert {
+      border: none;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+    }
+
+    .alert-success {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.05) 100%);
+      color: #166534;
+    }
+
+    .alert-danger {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%);
+      color: #991b1b;
+    }
+
+    .alert-warning {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.05) 100%);
+      color: #92400e;
+    }
+
+    .alert-info {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(8, 145, 178, 0.05) 100%);
+      color: #164e63;
+    }
+
+    /* Dropdown Styling */
+    .dropdown-menu {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      padding: 0.5rem 0;
+    }
+
+    .dropdown-item {
+      color: var(--text-primary);
+      font-weight: 500;
+      padding: 0.7rem 1rem;
+      transition: all 0.3s ease;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .dropdown-item:hover {
+      background-color: rgba(99, 102, 241, 0.1);
+      color: var(--primary-dark);
+    }
+
+    /* Icon Styling */
+    .nav-link i, .btn i {
+      font-size: 0.95rem;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+      color: var(--primary-color);
+      border-color: var(--border-color);
+      font-weight: 600;
+      border-radius: 6px;
+      margin: 0 2px;
+      transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+      background-color: rgba(99, 102, 241, 0.1);
+      border-color: var(--primary-color);
+    }
+
+    .pagination .page-item.active .page-link {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+      border-color: var(--primary-color);
+    }
+
+    /* Sidebar overflow fix */
+    #sidenav-main {
+      overflow-y: visible !important;
+      height: auto !important;
+    }
+
+    #sidenav-collapse-main {
+      overflow: visible !important;
+    }
+
+    /* Horizontal rule styling */
+    .horizontal {
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border-color), transparent);
+    }
+
+    /* Text utilities */
+    h1, h2, h3, h4, h5, h6 {
+      color: var(--text-primary);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .text-secondary {
+      color: var(--text-secondary) !important;
+    }
+
+    /* Link styling */
+    a {
+      color: var(--primary-color);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 991px) {
+      .sidenav {
+        margin-bottom: 1rem;
+        border-radius: 12px;
+      }
+
+      .nav-link {
+        padding: 0.75rem 0.875rem !important;
+      }
+    }
+  </style>
+  {% progressive_web_app_meta %}
+  <link rel="apple-touch-icon" href="{% static 'img/icon-192.png' %}">
+  <link rel="icon" type="image/png" sizes="192x192" href="{% static 'img/icon-192.png' %}">
+</head>
+<body class="g-sidenav-show bg-gray-100">
+
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-3 bg-white shadow" id="sidenav-main">
+  <div class="sidenav-header d-flex align-items-center px-3 py-4">
+    <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+      <div class="d-flex align-items-center justify-content-center me-2" style="width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#ec4899);border-radius:8px;box-shadow:0 4px 12px rgba(99, 102, 241, 0.2);">
+        <i class="fas fa-check-double text-white" style="font-size:1.1rem;"></i>
+      </div>
+      <span class="font-weight-bold text-dark" style="font-size:1.05rem;font-weight:700;letter-spacing:-0.5px;">Hangarin</span>
+    </a>
+  </div>
+  <hr class="horizontal dark mt-0">
+
+  <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+    <ul class="navbar-nav ps-2 pe-2">
+
+      <li class="sidebar-section-label">Main</li>
+
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% block nav_tasks %}{% endblock %}" href="{% url 'task-list' %}">
+          <div class="d-flex align-items-center justify-content-center me-2 shadow"
+               style="width:32px;height:32px;min-width:32px;background:#f8f9fa;border-radius:0.5rem;">
+            <i class="fas fa-list-check text-primary" style="font-size:0.85rem;"></i>
+          </div>
+          <span class="nav-link-text">My Tasks</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% block nav_subtasks %}{% endblock %}" href="{% url 'subtask-list' %}">
+          <div class="d-flex align-items-center justify-content-center me-2 border-radius-md shadow"
+               style="width:32px;height:32px;min-width:32px;background:#f8f9fa;border-radius:0.5rem;">
+            <i class="fas fa-list-ul text-primary" style="font-size:0.85rem;"></i>
+          </div>
+          <span class="nav-link-text">Sub Tasks</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% block nav_notes %}{% endblock %}" href="{% url 'note-list' %}">
+          <div class="d-flex align-items-center justify-content-center me-2 border-radius-md shadow"
+               style="width:32px;height:32px;min-width:32px;background:#f8f9fa;border-radius:0.5rem;">
+            <i class="fas fa-note-sticky text-primary" style="font-size:0.85rem;"></i>
+          </div>
+          <span class="nav-link-text">Notes</span>
+        </a>
+      </li>
+
+      <li class="sidebar-section-label">Settings</li>
+
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% block nav_categories %}{% endblock %}" href="{% url 'category-list' %}">
+          <div class="d-flex align-items-center justify-content-center me-2 border-radius-md shadow"
+               style="width:32px;height:32px;min-width:32px;background:#f8f9fa;border-radius:0.5rem;">
+            <i class="fas fa-folder text-primary" style="font-size:0.85rem;"></i>
+          </div>
+          <span class="nav-link-text">Categories</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link d-flex align-items-center {% block nav_priorities %}{% endblock %}" href="{% url 'priority-list' %}">
+          <div class="d-flex align-items-center justify-content-center me-2 border-radius-md shadow"
+               style="width:32px;height:32px;min-width:32px;background:#f8f9fa;border-radius:0.5rem;">
+            <i class="fas fa-flag text-primary" style="font-size:0.85rem;"></i>
+          </div>
+          <span class="nav-link-text">Priorities</span>
+        </a>
+      </li>
+
+      <li class="sidebar-section-label">Quick Actions</li>
+
+      <li class="nav-item mb-3">
+        <a class="nav-link d-flex align-items-center" href="{% url 'task-add' %}">
+          <div class="d-flex align-items-center justify-content-center me-2"
+               style="width:32px;height:32px;min-width:32px;background:linear-gradient(135deg,#6366f1,#ec4899);border-radius:8px;box-shadow:0 4px 12px rgba(99, 102, 241, 0.2);">
+            <i class="fas fa-plus text-white" style="font-size:0.85rem;"></i>
+          </div>
+          <span class="nav-link-text fw-semibold">Add New Task</span>
+        </a>
+      </li>
+
+    </ul>
+  </div>
+</aside>
+
+<main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
+  <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur">
+    <div class="container-fluid py-1 px-3 d-flex justify-content-between align-items-center">
+      <div></div>
+      <div class="d-flex align-items-center gap-3">
+        <i class="fas fa-bell text-secondary fs-6" style="cursor:pointer;transition:all 0.3s ease;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"></i>
+        <div class="d-flex align-items-center justify-content-center rounded-circle text-white fw-bold"
+             style="width:40px;height:40px;background:linear-gradient(135deg,#6366f1,#ec4899);font-size:0.9rem;box-shadow:0 4px 12px rgba(99, 102, 241, 0.2);font-weight:700;">
+          {{ request.user.username|first|upper }}
+        </div>
+        <div class="dropdown">
+          <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" style="font-weight:600;">
+            <span class="fw-semibold" style="font-size:0.9rem;color:#1e293b;">{{ request.user.username }}</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow">
+            <li><a class="dropdown-item" href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid py-4 px-4">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<script src="{% static 'js/core/popper.min.js' %}"></script>
+<script src="{% static 'js/core/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/argon-dashboard.min.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
