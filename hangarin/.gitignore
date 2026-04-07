@@ -1,4 +1,14 @@
 virtual_env/
+myworld/
 __pycache__/
 *.pyc
 .env
+*.sqlite3
+*.db
+.DS_Store
+.vscode/
+.idea/
+*.egg-info/
+dist/
+build/
+.env.local
